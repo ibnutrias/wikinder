@@ -27,59 +27,79 @@ export function buttonClass(
   return `${BASE} ${VARIANT[variant]} ${SIZE[size]} ${extra}`.trim();
 }
 
-type CommonProps = {
+type SharedProps = {
   children: ReactNode;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  className?: string;
+  /** Stretch to the container width. Never forwarded to the DOM. */
   block?: boolean;
+  className?: string;
 };
 
-type ButtonProps = CommonProps &
-  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className" | "children"> & {
-    href?: undefined;
-  };
+type ButtonElementProps = SharedProps &
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "className">;
 
-type LinkButtonProps = CommonProps & {
+type ButtonLinkProps = SharedProps & {
   href: string;
   external?: boolean;
   "aria-label"?: string;
 };
 
-function isLinkButton(props: ButtonProps | LinkButtonProps): props is LinkButtonProps {
-  return typeof (props as LinkButtonProps).href === "string";
+function classesFor({ variant, size, block, className }: SharedProps): string {
+  return buttonClass(variant, size, `${block ? "w-full" : ""} ${className ?? ""}`);
 }
 
-export function Button(props: ButtonProps | LinkButtonProps): React.ReactElement {
-  const { children, variant = "secondary", size = "md", className = "", block } = props;
-  const classes = buttonClass(variant, size, `${block ? "w-full" : ""} ${className}`);
-
-  if (isLinkButton(props)) {
-    const { href, external, "aria-label": ariaLabel } = props;
-    if (external) {
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={classes}
-          aria-label={ariaLabel}
-        >
-          {children}
-        </a>
-      );
-    }
-    return (
-      <Link href={href} className={classes} aria-label={ariaLabel}>
-        {children}
-      </Link>
-    );
-  }
-
-  const { ...rest } = props;
+function ButtonElement({
+  children,
+  variant = "secondary",
+  size = "md",
+  block = false,
+  className = "",
+  ...rest
+}: ButtonElementProps) {
   return (
-    <button type="button" {...rest} className={classes}>
+    <button
+      type="button"
+      {...rest}
+      className={classesFor({ variant, size, block, className, children })}
+    >
       {children}
     </button>
   );
+}
+
+function ButtonLink({
+  href,
+  external,
+  children,
+  "aria-label": ariaLabel,
+  ...shared
+}: ButtonLinkProps) {
+  const classes = classesFor({ ...shared, children });
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={classes}
+        aria-label={ariaLabel}
+      >
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={classes} aria-label={ariaLabel}>
+      {children}
+    </Link>
+  );
+}
+
+function isLinkButton(props: ButtonElementProps | ButtonLinkProps): props is ButtonLinkProps {
+  return typeof (props as ButtonLinkProps).href === "string";
+}
+
+export function Button(props: ButtonElementProps | ButtonLinkProps): React.ReactElement {
+  return isLinkButton(props) ? <ButtonLink {...props} /> : <ButtonElement {...props} />;
 }

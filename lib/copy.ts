@@ -170,6 +170,7 @@ export const COPY = {
       { kunci: "Esc", aksi: "Tutup panel atau kembali" },
     ],
     tanpaSeksi: "Artikel ini belum punya bagian. Ringkasannya ada di atas.",
+    bagian: "bagian",
     modeFokus: "Mode fokus",
     gambarArtikel: "Gambar artikel",
     perbesarGambar: "Perbesar gambar",
@@ -219,6 +220,13 @@ export const COPY = {
     tinggiBaris: "Tinggi baris",
     lebarBaca: "Lebar baca",
     pratinjau: "Pratinjau langsung",
+    ukuranNama: {
+      0: "Kecil",
+      1: "Sedang",
+      2: "Besar",
+      3: "Lebih besar",
+      4: "Terbesar",
+    } as Record<number, string>,
 
     bahasa: "Bahasa artikel",
     bahasaBantuan: "Dipakai untuk kartu acak dan pencarian.",

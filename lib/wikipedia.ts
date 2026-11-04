@@ -84,6 +84,8 @@ export function articlePath(lang: Lang, pageId: number): string {
   params.set("prop", "extracts|pageimages|info");
   params.set("explaintext", "1");
   params.set("exsectionformat", "wiki");
+  params.set("piprop", "thumbnail|name");
+  params.set("pithumbsize", "1200");
   params.set("inprop", "url");
   return `/w/api.php?${params.toString()}`;
 }
@@ -216,23 +218,42 @@ export type FullArticle = {
   pageId: number;
   title: string;
   extract: string;
+  /** Byte length reported by the API, useful before parsing. */
+  length: number;
+  /** ISO timestamp of the last revision, when the API reports it. */
+  touched: string | null;
   thumbnail?: { src: string; width: number; height: number };
   url: string;
 };
 
+/**
+ * Reader normaliser: unlike `normalizeCard` it accepts short articles and does
+ * not filter disambiguation pages (the reader shows whatever was requested).
+ */
 export function normalizeArticle(payload: unknown, lang: Lang): FullArticle | null {
   for (const page of readPages(payload)) {
-    const card = normalizeCard(page, lang);
-    if (card) {
-      return {
-        lang,
-        pageId: card.pageId,
-        title: card.title,
-        extract: card.extract,
-        ...(card.thumbnail ? { thumbnail: card.thumbnail } : {}),
-        url: card.url,
-      };
-    }
+    if (!isRecord(page)) continue;
+    if (page.missing !== undefined) return null;
+
+    const pageId = readNumber(page.pageid);
+    const title = readString(page.title)?.trim();
+    const extract = readString(page.extract);
+    if (pageId === null || pageId <= 0 || !title || extract === null) return null;
+
+    const length = readNumber(page.length);
+    const touched = readString(page.touched);
+    const thumbnail = readThumbnail(page.thumbnail);
+
+    return {
+      lang,
+      pageId: Math.round(pageId),
+      title,
+      extract: tidyExtract(extract),
+      length: length !== null && length > 0 ? Math.round(length) : 0,
+      touched,
+      ...(thumbnail ? { thumbnail } : {}),
+      url: articleUrl(lang, title),
+    };
   }
   return null;
 }

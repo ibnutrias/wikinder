@@ -31,8 +31,10 @@ function isActive(pathname: string, item: NavItem): boolean {
   );
 }
 
-export function BottomTabs(): React.ReactElement {
+export function BottomTabs(): React.ReactElement | null {
   const pathname = usePathname();
+  // The reader owns the bottom of the screen with its own action bar.
+  if (pathname.startsWith("/read/")) return null;
 
   return (
     <nav
@@ -71,8 +73,9 @@ export function BottomTabs(): React.ReactElement {
   );
 }
 
-export function SideRail(): React.ReactElement {
+export function SideRail(): React.ReactElement | null {
   const pathname = usePathname();
+  if (pathname.startsWith("/read/")) return null;
 
   return (
     <nav

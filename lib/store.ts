@@ -516,6 +516,19 @@ export function saveResume(entry: Omit<ResumeEntry, "updatedAt">): void {
   commit({ ...snapshot, resume });
 }
 
+/**
+ * Persists a resume point without notifying subscribers. Scroll tracking runs
+ * every second; re-rendering the whole reader for it would be wasteful.
+ */
+export function saveResumeQuiet(entry: Omit<ResumeEntry, "updatedAt">): void {
+  const resume = [
+    { ...entry, updatedAt: Date.now() },
+    ...snapshot.resume.filter((item) => item.pageId !== entry.pageId),
+  ].slice(0, MAX_RESUME);
+  persist(STORAGE_KEYS.resume, resume);
+  snapshot = { ...snapshot, resume };
+}
+
 export function clearResume(pageId: number): void {
   const resume = snapshot.resume.filter((item) => item.pageId !== pageId);
   persist(STORAGE_KEYS.resume, resume);

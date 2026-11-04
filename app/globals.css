@@ -418,7 +418,25 @@
     display: none !important;
   }
 
-  .print-open {
+  /* Reveal every reader section, including collapsed <details>. */
+  details::details-content {
+    content-visibility: visible !important;
     display: block !important;
+  }
+
+  details > *:not(summary) {
+    display: block !important;
+  }
+
+  .reader-prose {
+    max-width: none;
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    word-break: break-all;
   }
 }

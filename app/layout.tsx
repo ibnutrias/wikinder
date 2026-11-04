@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
@@ -67,7 +68,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
 
         <StoreBridge />
-        <SideRail />
+        <Suspense fallback={null}>
+          <SideRail />
+        </Suspense>
 
         <div className="md:pl-[4.5rem] lg:pl-[15rem]">
           <main
@@ -78,7 +81,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </main>
         </div>
 
-        <BottomTabs />
+        <Suspense fallback={null}>
+          <BottomTabs />
+        </Suspense>
         <ToastViewport />
       </body>
     </html>

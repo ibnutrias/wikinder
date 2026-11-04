@@ -75,6 +75,7 @@ export type UpstreamResult =
 export async function fetchWikipedia(
   lang: Parameters<typeof apiUrl>[0],
   path: string,
+  options: { revalidate?: number } = {},
 ): Promise<UpstreamResult> {
   let response: Response;
   try {
@@ -83,7 +84,9 @@ export async function fetchWikipedia(
         "User-Agent": userAgent(),
         Accept: "application/json",
       },
-      cache: "no-store",
+      ...(options.revalidate === undefined
+        ? { cache: "no-store" as RequestCache }
+        : { next: { revalidate: options.revalidate } }),
       signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
   } catch (error) {
