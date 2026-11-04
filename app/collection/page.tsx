@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
+import { CollectionView } from "@/components/collection/collection-view";
 import { COPY } from "@/lib/copy";
 
-export const metadata: Metadata = { title: COPY.koleksi.judul };
+export const metadata: Metadata = {
+  title: `${COPY.koleksi.judul} · ${COPY.wordmark}`,
+  description: COPY.koleksi.subjudul,
+};
 
 export default function CollectionPage() {
-  return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8">
-      <h1 className="text-display text-[clamp(2rem,6vw,2.75rem)]">{COPY.koleksi.judul}</h1>
-    </div>
-  );
+  return <CollectionView />;
 }

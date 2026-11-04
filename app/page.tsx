@@ -1,11 +1,16 @@
-import { Wordmark } from "@/components/wordmark";
+import type { Metadata } from "next";
+import { ExploreView } from "@/components/deck/explore-view";
+import { SessionProvider } from "@/components/deck/session-provider";
 import { COPY } from "@/lib/copy";
+
+export const metadata: Metadata = {
+  title: `${COPY.nav.jelajah} · ${COPY.wordmark}`,
+};
 
 export default function HomePage() {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-8">
-      <Wordmark size="sm" />
-      <h1 className="text-display text-[clamp(2rem,7vw,3rem)]">{COPY.deck.petunjuk}</h1>
-    </div>
+    <SessionProvider>
+      <ExploreView />
+    </SessionProvider>
   );
 }

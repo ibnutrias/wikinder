@@ -8,16 +8,14 @@ type WordmarkProps = {
 };
 
 const SIZE = {
-  sm: "text-[1.375rem]",
-  md: "text-[1.75rem]",
-  lg: "text-[2.5rem]",
+  sm: "t-18",
+  md: "t-22",
+  lg: "t-28",
 } as const;
 
 export function Wordmark({ size = "md", asLink = true, className = "" }: WordmarkProps) {
   const content = (
-    <span
-      className={`font-display italic leading-none tracking-[-0.01em] ${SIZE[size]} ${className}`}
-    >
+    <span className={`font-semibold tracking-[-0.02em] ${SIZE[size]} ${className}`}>
       {COPY.wordmark}
       <span aria-hidden="true" className="text-primary">
         .
@@ -30,8 +28,8 @@ export function Wordmark({ size = "md", asLink = true, className = "" }: Wordmar
   return (
     <Link
       href="/"
-      aria-label={`${COPY.wordmark} — ${COPY.nav.jelajah}`}
-      className="inline-flex items-baseline rounded-sm"
+      aria-label={`${COPY.wordmark}, ${COPY.nav.jelajah}`}
+      className="inline-flex items-baseline rounded-[var(--radius-selector)]"
     >
       {content}
     </Link>

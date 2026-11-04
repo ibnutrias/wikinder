@@ -1,21 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import { contrastRatio } from "@/lib/contrast";
-import { coverFor, coverMonogram, editionNumber, hashTitle } from "@/lib/cover";
+import { coverFor, coverMonogram, hashTitle } from "@/lib/cover";
 import type { Theme } from "@/lib/types";
 
-const THEMES: Theme[] = ["kertas", "malam", "sepia", "kontras"];
+const THEMES: Theme[] = ["terang", "gelap", "sepia", "kontras"];
 
 describe("cover palette", () => {
   it("is deterministic for a given title and theme", () => {
-    const first = coverFor("Batik", "kertas");
-    const second = coverFor("Batik", "kertas");
+    const first = coverFor("Batik", "terang");
+    const second = coverFor("Batik", "terang");
     expect(first).toEqual(second);
   });
 
   it("spreads titles across the palette", () => {
     const titles = ["Batik", "Gamelan", "Kopi", "Wayang", "Candi", "Rempah"];
-    const backgrounds = new Set(titles.map((title) => coverFor(title, "kertas").background));
+    const backgrounds = new Set(titles.map((title) => coverFor(title, "terang").background));
     expect(backgrounds.size).toBeGreaterThan(1);
   });
 
@@ -58,10 +58,5 @@ describe("cover helpers", () => {
   it("ignores punctuation and never returns an empty monogram", () => {
     expect(coverMonogram("  ")).toBe("?");
     expect(coverMonogram("—").length).toBeGreaterThan(0);
-  });
-
-  it("formats a four-digit shelf number", () => {
-    expect(editionNumber(42)).toBe("No. 0042");
-    expect(editionNumber(123456)).toBe("No. 3456");
   });
 });

@@ -2,8 +2,7 @@
 
 /*
  * `join` is excluded on purpose: daisyUI 5.7 emits an `@scope` rule there that
- * Turbopack's CSS parser rejects, which breaks the dev server. Nothing in
- * Wikinder uses joined inputs or buttons.
+ * Turbopack's CSS parser rejects, which breaks the dev server.
  */
 @plugin "daisyui" {
   themes: false;
@@ -12,43 +11,45 @@
 }
 
 /* -------------------------------------------------------------------------- */
-/* Themes: editorial paper, warm night, sepia, high contrast                   */
+/* Themes                                                                     */
+/* Each theme is a complete, self-contained palette. Contrast is verified by   */
+/* `node scripts/check-contrast.mjs`; results live in DESIGN.md.               */
 /* -------------------------------------------------------------------------- */
 
 @plugin "daisyui/theme" {
-  name: "kertas";
+  name: "terang";
   default: true;
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: #fbf8f2;
-  --color-base-200: #f3eee4;
-  --color-base-300: #e6dfd0;
-  --color-base-content: #1f1b16;
+  --color-base-100: #f5f6f8;
+  --color-base-200: #ffffff;
+  --color-base-300: #e9ecf1;
+  --color-base-content: #14161a;
 
-  --color-primary: #8e2a1f;
-  --color-primary-content: #fff8f0;
-  --color-secondary: #4a4133;
-  --color-secondary-content: #fbf8f2;
-  --color-accent: #8e2a1f;
-  --color-accent-content: #fff8f0;
-  --color-neutral: #26221c;
-  --color-neutral-content: #fbf8f2;
+  --color-primary: #2536d8;
+  --color-primary-content: #ffffff;
+  --color-secondary: #e7eaf0;
+  --color-secondary-content: #14161a;
+  --color-accent: #2536d8;
+  --color-accent-content: #ffffff;
+  --color-neutral: #14161a;
+  --color-neutral-content: #ffffff;
 
-  --color-info: #2f4a6b;
-  --color-info-content: #fbf8f2;
-  --color-success: #2f6b4f;
-  --color-success-content: #fbf8f2;
-  --color-warning: #7a4e12;
-  --color-warning-content: #fbf8f2;
-  --color-error: #a32a2a;
-  --color-error-content: #fff8f0;
+  --color-info: #1e40af;
+  --color-info-content: #ffffff;
+  --color-success: #0f7b5f;
+  --color-success-content: #ffffff;
+  --color-warning: #8a5a00;
+  --color-warning-content: #ffffff;
+  --color-error: #b3261e;
+  --color-error-content: #ffffff;
 
-  --muted: #5b5347;
-  --hairline: #d9d0bf;
-  --stamp: #8e2a1f;
+  --muted: #4a505c;
+  --hairline: #d7dbe3;
+  --stamp: #2536d8;
 
-  --radius-selector: 9999px;
+  --radius-selector: 6px;
   --radius-field: 10px;
   --radius-box: 16px;
   --size-selector: 0.25rem;
@@ -59,39 +60,39 @@
 }
 
 @plugin "daisyui/theme" {
-  name: "malam";
+  name: "gelap";
   default: false;
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #14120f;
-  --color-base-200: #1c1915;
-  --color-base-300: #28241e;
-  --color-base-content: #efe8da;
+  --color-base-100: #0f1115;
+  --color-base-200: #171a20;
+  --color-base-300: #21252e;
+  --color-base-content: #e8eaee;
 
-  --color-primary: #e58f7a;
-  --color-primary-content: #2a0e08;
-  --color-secondary: #a2937c;
-  --color-secondary-content: #14120f;
-  --color-accent: #e58f7a;
-  --color-accent-content: #2a0e08;
-  --color-neutral: #2e2820;
-  --color-neutral-content: #efe8da;
+  --color-primary: #9aa6ff;
+  --color-primary-content: #0b1030;
+  --color-secondary: #21252e;
+  --color-secondary-content: #e8eaee;
+  --color-accent: #9aa6ff;
+  --color-accent-content: #0b1030;
+  --color-neutral: #e8eaee;
+  --color-neutral-content: #0f1115;
 
-  --color-info: #9cc0dd;
-  --color-info-content: #0b1a26;
-  --color-success: #7fc49a;
-  --color-success-content: #08170f;
-  --color-warning: #e3b36b;
-  --color-warning-content: #241505;
-  --color-error: #f09090;
-  --color-error-content: #2b0a0a;
+  --color-info: #9cc7ff;
+  --color-info-content: #08111f;
+  --color-success: #4ecfa0;
+  --color-success-content: #04150f;
+  --color-warning: #f0b860;
+  --color-warning-content: #1c1204;
+  --color-error: #ff8a80;
+  --color-error-content: #200605;
 
-  --muted: #b4a893;
-  --hairline: #37312a;
-  --stamp: #f09090;
+  --muted: #a7adb9;
+  --hairline: #2a2f38;
+  --stamp: #9aa6ff;
 
-  --radius-selector: 9999px;
+  --radius-selector: 6px;
   --radius-field: 10px;
   --radius-box: 16px;
   --size-selector: 0.25rem;
@@ -107,34 +108,34 @@
   prefersdark: false;
   color-scheme: light;
 
-  --color-base-100: #f1e4c8;
-  --color-base-200: #e9d9b6;
-  --color-base-300: #dcc793;
-  --color-base-content: #3b2f20;
+  --color-base-100: #f1e6cf;
+  --color-base-200: #f8f0de;
+  --color-base-300: #e4d5b4;
+  --color-base-content: #3a2e1f;
 
   --color-primary: #7a2e1b;
-  --color-primary-content: #fbe9c8;
-  --color-secondary: #5a4526;
-  --color-secondary-content: #f7e9cb;
+  --color-primary-content: #fbebd2;
+  --color-secondary: #e4d5b4;
+  --color-secondary-content: #3a2e1f;
   --color-accent: #7a2e1b;
-  --color-accent-content: #fbe9c8;
-  --color-neutral: #4a3b26;
-  --color-neutral-content: #f5e7c9;
+  --color-accent-content: #fbebd2;
+  --color-neutral: #3a2e1f;
+  --color-neutral-content: #f1e6cf;
 
   --color-info: #3f4e6e;
-  --color-info-content: #f1e4c8;
+  --color-info-content: #f1e6cf;
   --color-success: #2e5b3c;
-  --color-success-content: #f1e4c8;
+  --color-success-content: #f1e6cf;
   --color-warning: #7a4e12;
-  --color-warning-content: #f1e4c8;
+  --color-warning-content: #f1e6cf;
   --color-error: #8c2c22;
-  --color-error-content: #fbe9c8;
+  --color-error-content: #f1e6cf;
 
   --muted: #6a5740;
-  --hairline: #cbb682;
+  --hairline: #c9b58a;
   --stamp: #7a2e1b;
 
-  --radius-selector: 9999px;
+  --radius-selector: 6px;
   --radius-field: 10px;
   --radius-box: 16px;
   --size-selector: 0.25rem;
@@ -152,7 +153,7 @@
 
   --color-base-100: #ffffff;
   --color-base-200: #f2f2f2;
-  --color-base-300: #e3e3e3;
+  --color-base-300: #e0e0e0;
   --color-base-content: #000000;
 
   --color-primary: #0a2540;
@@ -173,13 +174,13 @@
   --color-error: #8b0000;
   --color-error-content: #ffffff;
 
-  --muted: #3a3a3a;
-  --hairline: #bdbdbd;
+  --muted: #333333;
+  --hairline: #9a9a9a;
   --stamp: #8b0000;
 
-  --radius-selector: 9999px;
-  --radius-field: 8px;
-  --radius-box: 12px;
+  --radius-selector: 6px;
+  --radius-field: 10px;
+  --radius-box: 16px;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 2px;
@@ -192,22 +193,31 @@
 /* -------------------------------------------------------------------------- */
 
 @theme {
-  --font-display: var(--font-instrument), Georgia, "Times New Roman", serif;
+  --font-ui: var(--font-schibsted), "Helvetica Neue", Helvetica, sans-serif;
+  --font-display: var(--font-schibsted), "Helvetica Neue", Helvetica, sans-serif;
   --font-reading: var(--font-newsreader), Georgia, "Times New Roman", serif;
-  --font-ui: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
 
   --color-muted: var(--muted);
   --color-hairline: var(--hairline);
   --color-stamp: var(--stamp);
 
-  --shadow-card:
-    0 1px 1px rgb(31 27 22 / 0.04), 0 6px 12px -6px rgb(31 27 22 / 0.12),
-    0 18px 38px -24px rgb(31 27 22 / 0.28);
-  --shadow-lifted:
-    0 2px 2px rgb(31 27 22 / 0.05), 0 10px 20px -8px rgb(31 27 22 / 0.16),
-    0 32px 60px -30px rgb(31 27 22 / 0.32);
+  /* Floating layers get a shadow and no border; static surfaces get a border. */
+  --shadow-float: 0 1px 2px rgb(15 17 21 / 0.06), 0 10px 28px -12px rgb(15 17 21 / 0.22);
+  --shadow-sheet: 0 -10px 44px -16px rgb(15 17 21 / 0.28);
 
-  --ease-editorial: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out-strong: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+
+  /* Only these type steps are allowed. See DESIGN.md. */
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-22: 1.375rem;
+  --text-28: clamp(1.5rem, 1.19rem + 1.3vw, 1.75rem);
+  --text-36: clamp(1.75rem, 1.24rem + 2.2vw, 2.25rem);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -219,16 +229,25 @@
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     background-color: var(--color-base-100);
+    text-wrap: pretty;
   }
 
   body {
     font-family: var(--font-ui);
+    font-size: var(--text-16);
     background-color: var(--color-base-100);
     color: var(--color-base-content);
-    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100dvh;
+    overscroll-behavior-y: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
   }
 
   ::selection {
@@ -247,6 +266,13 @@
   select,
   textarea {
     font: inherit;
+  }
+
+  /* 16px minimum in inputs prevents iOS Safari's auto-zoom. */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
   }
 
   button {
@@ -270,69 +296,103 @@
       transition-duration: 0.01ms !important;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-motion="penuh"] {
+      scroll-behavior: auto;
+    }
+  }
 }
 
 /* -------------------------------------------------------------------------- */
-/* Utilities                                                                  */
+/* Type scale utilities                                                       */
 /* -------------------------------------------------------------------------- */
 
-@utility label-caps {
-  font-family: var(--font-ui);
-  font-size: 0.6875rem;
+@utility t-12 {
+  font-size: var(--text-12);
+  line-height: 1.4;
+}
+
+@utility t-14 {
+  font-size: var(--text-14);
+  line-height: 1.45;
+}
+
+@utility t-16 {
+  font-size: var(--text-16);
+  line-height: 1.55;
+}
+
+@utility t-18 {
+  font-size: var(--text-18);
+  line-height: 1.55;
+}
+
+@utility t-22 {
+  font-size: var(--text-22);
+  line-height: 1.3;
   font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
-@utility text-display {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.015em;
-  line-height: 1.05;
+@utility t-28 {
+  font-size: var(--text-28);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
 }
 
-@utility text-measure {
-  max-width: 65ch;
+@utility t-36 {
+  font-size: var(--text-36);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.016em;
+  text-wrap: balance;
 }
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }
 
-/* Very fine paper grain, drawn inline so it costs no request. */
-@utility paper-grain {
-  position: relative;
-  isolation: isolate;
+/* Cover monogram: display art, deliberately larger than the UI type scale. */
+@utility cover-monogram {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 17vw, 7rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
-.paper-grain::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.32;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-[data-theme="malam"] .paper-grain::after,
-[data-theme="kontras"] .paper-grain::after {
-  mix-blend-mode: screen;
-  opacity: 0.18;
-}
-
-/* Kerning pairs for small caps labels on the tab bar. */
-.tab-label {
-  letter-spacing: 0.06em;
+/* Explicit "reduced motion" setting, independent of the OS preference. */
+[data-motion="reduce"] *,
+[data-motion="reduce"] *::before,
+[data-motion="reduce"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* Reader typography is driven by CSS variables so the panel previews live. */
 .reader-prose {
   font-family: var(--reader-font, var(--font-reading));
-  font-size: var(--reader-size, 1.125rem);
+  font-size: var(--reader-size, var(--text-18));
   line-height: var(--reader-leading, 1.65);
+  max-width: var(--reader-measure, 65ch);
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .reader-prose p {
@@ -341,4 +401,24 @@
 
 .reader-prose p:last-child {
   margin-bottom: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Print                                                                      */
+/* -------------------------------------------------------------------------- */
+
+@media print {
+  html,
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-open {
+    display: block !important;
+  }
 }

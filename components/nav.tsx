@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bookmark, Compass, Search, SlidersHorizontal, type LucideIcon } from "lucide-react";
-import { COPY } from "@/lib/copy";
 import { Wordmark } from "@/components/wordmark";
+import { COPY } from "@/lib/copy";
 
 type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  /** Extra route prefixes that should light up this tab. */
   matches: string[];
 };
 
@@ -37,8 +36,8 @@ export function BottomTabs(): React.ReactElement {
 
   return (
     <nav
-      aria-label="Navigasi utama"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-base-100/95 backdrop-blur-sm md:hidden"
+      aria-label={COPY.nav.utama}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-base-100 md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="grid grid-cols-4">
@@ -50,26 +49,16 @@ export function BottomTabs(): React.ReactElement {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="relative flex min-h-[3.5rem] flex-col items-center justify-center gap-1 pt-1 pb-1.5"
+                className="flex min-h-[3.5rem] flex-col items-center justify-center gap-1 py-1.5"
               >
-                <span
-                  aria-hidden="true"
-                  className={`absolute inset-x-5 top-0 h-[2px] rounded-full transition-colors ${
-                    active ? "bg-primary" : "bg-transparent"
-                  }`}
-                />
                 <Icon
                   aria-hidden="true"
-                  size={22}
-                  strokeWidth={active ? 1.9 : 1.5}
+                  size={24}
+                  strokeWidth={1.5}
                   className={active ? "text-primary" : "text-muted"}
                 />
                 <span
-                  className={`tab-label text-[0.625rem] ${
-                    active
-                      ? "font-semibold text-base-content"
-                      : "font-medium text-muted"
-                  }`}
+                  className={`t-12 ${active ? "font-semibold text-primary" : "font-medium text-muted"}`}
                 >
                   {item.label}
                 </span>
@@ -87,16 +76,16 @@ export function SideRail(): React.ReactElement {
 
   return (
     <nav
-      aria-label="Navigasi utama (layar lebar)"
-      className="fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-hairline bg-base-200/60 md:flex md:w-[4.5rem] lg:w-[14.5rem]"
+      aria-label={COPY.nav.utamaLebar}
+      className="fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-hairline bg-base-100 md:flex md:w-[4.5rem] lg:w-[15rem]"
     >
-      <div className="flex h-16 items-center px-4 lg:px-6">
+      <div className="flex h-16 items-center px-4 lg:px-5">
         <span className="hidden lg:block">
           <Wordmark size="sm" />
         </span>
         <span className="mx-auto lg:hidden">
-          <span className="font-display text-[1.25rem] italic" aria-hidden="true">
-            W
+          <span className="t-18 font-semibold" aria-hidden="true">
+            W<span className="text-primary">.</span>
           </span>
           <span className="sr-only">{COPY.wordmark}</span>
         </span>
@@ -111,28 +100,20 @@ export function SideRail(): React.ReactElement {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`group relative flex min-h-12 items-center gap-3 rounded-[var(--radius-field)] px-3 py-2.5 transition-colors ${
+                className={`flex min-h-12 items-center gap-3 rounded-[var(--radius-field)] px-3 py-2.5 transition-colors duration-[var(--duration-fast)] lg:border ${
                   active
-                    ? "bg-base-100 text-base-content shadow-[inset_0_0_0_1px_var(--color-hairline)]"
-                    : "text-muted hover:bg-base-300/50 hover:text-base-content"
+                    ? "bg-base-200 text-base-content lg:border-hairline"
+                    : "text-muted hover:bg-base-200 hover:text-base-content lg:border-transparent"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className={`absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 rounded-full ${
-                    active ? "bg-primary" : "bg-transparent"
-                  }`}
-                />
                 <Icon
                   aria-hidden="true"
                   size={20}
-                  strokeWidth={active ? 1.9 : 1.5}
+                  strokeWidth={1.5}
                   className={active ? "text-primary" : undefined}
                 />
                 <span
-                  className={`hidden text-[0.875rem] lg:inline ${
-                    active ? "font-semibold" : "font-medium"
-                  }`}
+                  className={`hidden t-14 lg:inline ${active ? "font-semibold" : "font-medium"}`}
                 >
                   {item.label}
                 </span>
@@ -143,10 +124,8 @@ export function SideRail(): React.ReactElement {
         })}
       </ul>
 
-      <p className="hidden px-6 pb-6 lg:block">
-        <span className="label-caps block text-[0.5625rem] leading-relaxed text-muted">
-          {COPY.pengaturan.tentangIsi.split(".")[0]}.
-        </span>
+      <p className="hidden px-5 pb-5 t-12 leading-relaxed text-muted lg:block">
+        {COPY.pengaturan.tentangIsi}
       </p>
     </nav>
   );

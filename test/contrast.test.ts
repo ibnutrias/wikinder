@@ -13,7 +13,7 @@ const THEMES = parseThemeBlocks(CSS);
 describe("contrast maths", () => {
   it("parses three- and six-digit hex", () => {
     expect(hexToRgb("#000")).toEqual({ r: 0, g: 0, b: 0 });
-    expect(hexToRgb("#FBF8F2")).toEqual({ r: 251, g: 248, b: 242 });
+    expect(hexToRgb("#F5F6F8")).toEqual({ r: 245, g: 246, b: 248 });
     expect(hexToRgb("not-a-colour")).toBeNull();
   });
 
@@ -24,7 +24,7 @@ describe("contrast maths", () => {
 
 describe("theme tokens", () => {
   it("finds all four themes in globals.css", () => {
-    expect(Object.keys(THEMES).sort()).toEqual(["kertas", "kontras", "malam", "sepia"]);
+    expect(Object.keys(THEMES).sort()).toEqual(["gelap", "kontras", "sepia", "terang"]);
   });
 
   it("defines every token the interface uses", () => {
