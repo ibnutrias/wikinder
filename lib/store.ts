@@ -1,342 +1,388 @@
-import type { Settings } from "./copy";
+import { useSyncExternalStore } from "react";
+import {
+  DEFAULT_SETTINGS,
+  type Card,
+  type CollectionItem,
+  type Lang,
+  type Settings,
+  type TextSize,
+  type Theme,
+} from "./types";
 
-type Listener = () => void;
+/* -------------------------------------------------------------------------- */
+/* Keys and schema                                                            */
+/* -------------------------------------------------------------------------- */
 
-type Snapshot = {
-  settings: Settings;
-  collection: import("./copy").CollectionItem[];
-  seen: number[];
-  hidden: number[];
-};
+export const STORE_VERSION = 1;
+export const STORE_PREFIX = `wikinder:v${STORE_VERSION}:`;
 
-const STORE_PREFIX = "wikinder:v1:";
-const KEYS = {
-  settings: STORE_PREFIX + "settings",
-  collection: STORE_PREFIX + "collection",
-  seen: STORE_PREFIX + "seen",
-  hidden: STORE_PREFIX + "hidden",
+export const STORAGE_KEYS = {
+  settings: `${STORE_PREFIX}settings`,
+  collection: `${STORE_PREFIX}collection`,
+  seen: `${STORE_PREFIX}seen`,
+  hidden: `${STORE_PREFIX}hidden`,
 } as const;
 
-type Persisted = {
-  version: 1;
+export const MAX_COLLECTION = 500;
+export const MAX_SEEN = 200;
+
+export type Snapshot = {
   settings: Settings;
-  collection: import("./copy").CollectionItem[];
+  collection: CollectionItem[];
   seen: number[];
   hidden: number[];
 };
 
-function DEFAULT_SETTINGS(): Settings {
-  return {
-    theme: "kertas",
-    textSize: 2,
-    fontChoice: "serif",
-    lineHeight: 1.6,
-    lang: "id",
-    imageOnly: false,
-  };
-}
+const EMPTY_SNAPSHOT: Snapshot = {
+  settings: DEFAULT_SETTINGS,
+  collection: [],
+  seen: [],
+  hidden: [],
+};
 
-function inBoundsLang(lang: unknown): lang is Settings["lang"] {
-  return lang === "id" || lang === "en" || lang === "jv" || lang === "su";
-}
+/* -------------------------------------------------------------------------- */
+/* Defensive readers                                                          */
+/* -------------------------------------------------------------------------- */
 
-function inBoundsTheme(theme: unknown): theme is Settings["theme"] {
-  return (
-    theme === "kertas" || theme === "malam" || theme === "sepia" || theme === "kontras"
-  );
-}
+type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-function inBoundsFontChoice(v: unknown): v is Settings["fontChoice"] {
-  return v === "serif" || v === "sans";
-}
-
-function inBoundsTextSize(v: unknown): v is Settings["textSize"] {
-  return (
-    (typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= 4) ||
-    false
-  );
-}
-
-function readPersisted(): Persisted | null {
+function getStorage(): StorageLike | null {
   try {
-    const raw = localStorage.getItem(KEYS.settings);
-    if (!raw) return null;
-    const parsed: Persisted | null =
-      (() => {
-        try {
-          const p = JSON.parse(raw) as Persisted;
-          if (!p || typeof p !== "object" || p.version !== 1) return null;
-          return p as Persisted;
-        } catch {
-          return null;
-        }
-      })();
-    return parsed;
+    if (typeof globalThis.localStorage === "undefined") return null;
+    return globalThis.localStorage;
   } catch {
+    // Safari in private mode throws on access.
     return null;
   }
 }
 
-function writePersisted(p: Persisted): boolean {
+function readJSON(key: string): unknown {
+  const storage = getStorage();
+  if (!storage) return null;
   try {
-    localStorage.setItem(KEYS.settings, JSON.stringify(p));
-    localStorage.setItem(KEYS.collection, JSON.stringify(p.collection));
-    localStorage.setItem(KEYS.seen, JSON.stringify(p.seen));
-    localStorage.setItem(KEYS.hidden, JSON.stringify(p.hidden));
+    const raw = storage.getItem(key);
+    if (raw === null) return null;
+    return JSON.parse(raw) as unknown;
+  } catch {
+    // Corrupt payload: treat as absent rather than crashing the app.
+    return null;
+  }
+}
+
+function writeJSON(key: string, value: unknown): boolean {
+  const storage = getStorage();
+  if (!storage) return false;
+  try {
+    storage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
+    // Quota exceeded or storage disabled mid-session.
     return false;
   }
 }
 
-function persistFull(snap: Snapshot): void {
-  const p: Persisted = {
-    version: 1,
-    settings: snap.settings,
-    collection: snap.collection,
-    seen: snap.seen,
-    hidden: snap.hidden,
-  };
-  writePersisted(p);
-}
-
-function migrateSettings(raw: unknown): Settings {
-  const def = DEFAULT_SETTINGS();
-  if (!raw || typeof raw !== "object") return def;
-  const r = raw as Record<string, unknown>;
-  const s = { ...def };
-  if (inBoundsTheme(r.theme)) s.theme = r.theme;
-  if (inBoundsTextSize(r.textSize)) s.textSize = r.textSize;
-  if (inBoundsFontChoice(r.fontChoice)) s.fontChoice = r.fontChoice;
-  if (typeof r.lineHeight === "number" && isFinite(r.lineHeight)) s.lineHeight = r.lineHeight;
-  if (inBoundsLang(r.lang)) s.lang = r.lang;
-  if (typeof r.imageOnly === "boolean") s.imageOnly = r.imageOnly;
-  return s;
-}
-
-function migrateCollection(raw: unknown): import("./copy").CollectionItem[] {
-  if (!Array.isArray(raw)) return [];
-  const out: import("./copy").CollectionItem[] = [];
-  for (const item of raw) {
-    if (!item || typeof item !== "object") continue;
-    const r = item as import("./copy").CollectionItem;
-    if (!r.card || typeof r.card !== "object") continue;
-    const card = r.card as import("./copy").CardSummary;
-    if (typeof card.pageId !== "number" || !isFinite(card.pageId)) continue;
-    if (typeof card.lang !== "string" || !inBoundsLang(card.lang)) continue;
-    if (typeof card.title !== "string" || !card.title) continue;
-    if (typeof card.extract !== "string") continue;
-    if (typeof r.savedAt !== "number" || !isFinite(r.savedAt)) continue;
-    if (r.status !== "want" && r.status !== "read") continue;
-    out.push({
-      card: {
-        pageId: card.pageId,
-        lang: card.lang as Settings["lang"],
-        title: card.title,
-        extract: card.extract,
-        thumbnail:
-          card.thumbnail && typeof card.thumbnail === "object"
-            ? {
-                src: card.thumbnail.src,
-                width: card.thumbnail.width,
-                height: card.thumbnail.height,
-              }
-            : undefined,
-        url: card.url,
-      },
-      savedAt: r.savedAt,
-      status: r.status,
-    });
+function removeKey(key: string): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.removeItem(key);
+  } catch {
+    /* best effort */
   }
-  if (out.length > 500) out.length = 500;
-  return out;
 }
 
-function migrateList(raw: unknown): number[] {
-  if (!Array.isArray(raw)) return [];
-  const out: number[] = [];
-  const seen = new Set<number>();
-  for (const id of raw) {
-    if (typeof id !== "number" || !isFinite(id)) continue;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    out.push(id);
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+const THEMES: readonly Theme[] = ["kertas", "malam", "sepia", "kontras"];
+const LANGS: readonly Lang[] = ["id", "en", "jv", "su"];
+
+function isTheme(value: unknown): value is Theme {
+  return typeof value === "string" && (THEMES as readonly string[]).includes(value);
+}
+
+function isLang(value: unknown): value is Lang {
+  return typeof value === "string" && (LANGS as readonly string[]).includes(value);
+}
+
+function isTextSize(value: unknown): value is TextSize {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 4;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Migrations                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Accepts any historical settings payload. Every field falls back to its
+ * default so a single bad value never wipes the rest.
+ */
+export function migrateSettings(raw: unknown): Settings {
+  const settings: Settings = { ...DEFAULT_SETTINGS };
+  if (isRecord(raw) && "v" in raw && isRecord(raw.data)) {
+    return migrateSettings(raw.data);
   }
-  if (out.length > 200) out.length = 200;
-  return out;
+  if (!isRecord(raw)) return settings;
+
+  if (isTheme(raw.theme)) settings.theme = raw.theme;
+  if (isTextSize(raw.textSize)) settings.textSize = raw.textSize;
+  if (raw.fontChoice === "serif" || raw.fontChoice === "sans") {
+    settings.fontChoice = raw.fontChoice;
+  }
+  if (
+    typeof raw.lineHeight === "number" &&
+    Number.isFinite(raw.lineHeight) &&
+    raw.lineHeight >= 1.2 &&
+    raw.lineHeight <= 2.2
+  ) {
+    settings.lineHeight = Math.round(raw.lineHeight * 100) / 100;
+  }
+  if (isLang(raw.lang)) settings.lang = raw.lang;
+  if (typeof raw.imageOnly === "boolean") settings.imageOnly = raw.imageOnly;
+  return settings;
 }
 
-const initial: Persisted | null = readPersisted();
-const initialSnapshot: Snapshot = initial
-  ? {
-      settings: initial.settings,
-      collection: initial.collection,
-      seen: initial.seen,
-      hidden: initial.hidden,
+function migrateCard(raw: unknown): Card | null {
+  if (!isRecord(raw)) return null;
+  const pageId = typeof raw.pageId === "number" ? raw.pageId : Number(raw.pageId);
+  if (!Number.isFinite(pageId) || pageId <= 0) return null;
+  if (!isLang(raw.lang)) return null;
+  if (typeof raw.title !== "string" || raw.title.trim() === "") return null;
+  if (typeof raw.extract !== "string") return null;
+
+  let thumbnail: Card["thumbnail"];
+  if (isRecord(raw.thumbnail)) {
+    const { src, width, height } = raw.thumbnail;
+    if (
+      typeof src === "string" &&
+      typeof width === "number" &&
+      typeof height === "number" &&
+      width > 0 &&
+      height > 0
+    ) {
+      thumbnail = { src, width, height };
     }
-  : {
-      settings: DEFAULT_SETTINGS(),
-      collection: [],
-      seen: [],
-      hidden: [],
-    };
+  }
 
-function identity<T>(v: T): T {
-  return v;
+  return {
+    pageId,
+    lang: raw.lang,
+    title: raw.title,
+    extract: raw.extract,
+    ...(thumbnail ? { thumbnail } : {}),
+    url: typeof raw.url === "string" ? raw.url : "",
+  };
+}
+
+export function migrateCollection(raw: unknown): CollectionItem[] {
+  if (isRecord(raw) && "v" in raw && Array.isArray(raw.data)) {
+    return migrateCollection(raw.data);
+  }
+  if (!Array.isArray(raw)) return [];
+
+  const items: CollectionItem[] = [];
+  const seen = new Set<number>();
+  for (const entry of raw) {
+    if (!isRecord(entry)) continue;
+    const card = migrateCard(entry.card);
+    if (!card || seen.has(card.pageId)) continue;
+    if (entry.status !== "want" && entry.status !== "read") continue;
+    const savedAt =
+      typeof entry.savedAt === "number" && Number.isFinite(entry.savedAt)
+        ? entry.savedAt
+        : Date.now();
+    seen.add(card.pageId);
+    items.push({ card, savedAt, status: entry.status });
+    if (items.length >= MAX_COLLECTION) break;
+  }
+  return items;
+}
+
+export function migrateIdList(raw: unknown, max = MAX_SEEN): number[] {
+  if (isRecord(raw) && "v" in raw && Array.isArray(raw.data)) {
+    return migrateIdList(raw.data, max);
+  }
+  if (!Array.isArray(raw)) return [];
+  const ids: number[] = [];
+  const seen = new Set<number>();
+  for (const value of raw) {
+    if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) continue;
+    if (seen.has(value)) continue;
+    seen.add(value);
+    ids.push(value);
+  }
+  return ids.length > max ? ids.slice(ids.length - max) : ids;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Store                                                                      */
+/* -------------------------------------------------------------------------- */
+
+let snapshot: Snapshot = EMPTY_SNAPSHOT;
+let hydrated = false;
+const listeners = new Set<() => void>();
+
+function emit(): void {
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot(): Snapshot {
+  return snapshot;
 }
 
 function getServerSnapshot(): Snapshot {
-  return initialSnapshot;
+  return EMPTY_SNAPSHOT;
 }
 
-let listeners = new Set<Listener>();
-let current = initialSnapshot;
+function commit(next: Snapshot): void {
+  snapshot = next;
+  emit();
+}
 
-function snapshotStable(a: Snapshot, b: Snapshot): boolean {
-  return (
-    a.settings.theme === b.settings.theme &&
-    a.settings.textSize === b.settings.textSize &&
-    a.settings.fontChoice === b.settings.fontChoice &&
-    a.settings.lineHeight === b.settings.lineHeight &&
-    a.settings.lang === b.settings.lang &&
-    a.settings.imageOnly === b.settings.imageOnly &&
-    a.collection.length === b.collection.length &&
-    a.seen.length === b.seen.length &&
-    a.hidden.length === b.hidden.length
+function persist(key: string, data: unknown): void {
+  writeJSON(key, { v: STORE_VERSION, data });
+}
+
+/** Reads localStorage once per page load and merges it into the store. */
+export function hydrateStore(): void {
+  if (hydrated) return;
+  hydrated = true;
+
+  const settings = migrateSettings(readJSON(STORAGE_KEYS.settings));
+  const collection = migrateCollection(readJSON(STORAGE_KEYS.collection));
+  const seen = migrateIdList(readJSON(STORAGE_KEYS.seen));
+  const hidden = migrateIdList(readJSON(STORAGE_KEYS.hidden));
+
+  commit({ settings, collection, seen, hidden });
+}
+
+export function isHydrated(): boolean {
+  return hydrated;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Actions                                                                    */
+/* -------------------------------------------------------------------------- */
+
+export function updateSettings(patch: Partial<Settings>): void {
+  const settings = migrateSettings({ ...snapshot.settings, ...patch });
+  persist(STORAGE_KEYS.settings, settings);
+  commit({ ...snapshot, settings });
+}
+
+export function resetSettings(): void {
+  persist(STORAGE_KEYS.settings, DEFAULT_SETTINGS);
+  commit({ ...snapshot, settings: { ...DEFAULT_SETTINGS } });
+}
+
+export function saveCard(card: Card): void {
+  if (snapshot.collection.some((item) => item.card.pageId === card.pageId)) return;
+  const item: CollectionItem = { card, savedAt: Date.now(), status: "want" };
+  const collection = [item, ...snapshot.collection].slice(0, MAX_COLLECTION);
+  persist(STORAGE_KEYS.collection, collection);
+  commit({ ...snapshot, collection });
+}
+
+export function removeCard(pageId: number): void {
+  const collection = snapshot.collection.filter((item) => item.card.pageId !== pageId);
+  persist(STORAGE_KEYS.collection, collection);
+  commit({ ...snapshot, collection });
+}
+
+export function setCardStatus(pageId: number, status: CollectionItem["status"]): void {
+  const collection = snapshot.collection.map((item) =>
+    item.card.pageId === pageId ? { ...item, status } : item,
   );
+  persist(STORAGE_KEYS.collection, collection);
+  commit({ ...snapshot, collection });
 }
 
-const STORE = {
-  getSnapshot: () => current,
-  subscribe: (listener: Listener): (() => void) => {
-    listeners.add(listener);
-    return () => {
-      listeners.delete(listener);
-    };
-  },
-  getServerSnapshot: getServerSnapshot,
-  fullRender: true,
-};
-
-function setSettings(next: Settings): void {
-  const snap = { ...current, settings: next };
-  if (snapshotStable(current, snap)) return;
-  current = snap;
-  persistFull(snap);
-  listeners.forEach((l) => l());
+/** Restores a card that was just removed, keeping its original timestamp. */
+export function restoreCard(item: CollectionItem): void {
+  if (snapshot.collection.some((entry) => entry.card.pageId === item.card.pageId)) return;
+  const collection = [...snapshot.collection, item].slice(0, MAX_COLLECTION);
+  persist(STORAGE_KEYS.collection, collection);
+  commit({ ...snapshot, collection });
 }
 
-function setCollection(next: import("./copy").CollectionItem[]): void {
-  const snap = { ...current, collection: next };
-  if (snapshotStable(current, snap)) return;
-  current = snap;
-  persistFull(snap);
-  listeners.forEach((l) => l());
+export function markSeen(pageId: number): void {
+  if (snapshot.seen.includes(pageId)) return;
+  const seen = [...snapshot.seen, pageId];
+  const trimmed = seen.length > MAX_SEEN ? seen.slice(seen.length - MAX_SEEN) : seen;
+  persist(STORAGE_KEYS.seen, trimmed);
+  commit({ ...snapshot, seen: trimmed });
 }
 
-function setSeen(next: number[]): void {
-  const snap = { ...current, seen: next };
-  if (snapshotStable(current, snap)) return;
-  current = snap;
-  persistFull(snap);
-  listeners.forEach((l) => l());
-}
-
-function setHidden(next: number[]): void {
-  const snap = { ...current, hidden: next };
-  if (snapshotStable(current, snap)) return;
-  current = snap;
-  persistFull(snap);
-  listeners.forEach((l) => l());
-}
-
-export function useSettings<T>(select: (s: Settings) => T): T {
-  const snap = useSyncExternalStore(STORE.getSnapshot, STORE.subscribe);
-  return select(snap.settings);
-}
-
-export function useCollection<T>(select: (c: import("./copy").CollectionItem[]) => T): T {
-  const snap = useSyncExternalStore(STORE.getSnapshot, STORE.subscribe);
-  return select(snap.collection);
-}
-
-export function useSeen(): number[] {
-  return useSyncExternalStore(STORE.getSnapshot, STORE.subscribe).seen;
-}
-
-export function useHidden(): number[] {
-  return useSyncExternalStore(STORE.getSnapshot, STORE.subscribe).hidden;
-}
-
-export function setSettingsStore(next: Settings): void {
-  setSettings(next);
-}
-
-export function addToCollection(item: import("./copy").CollectionItem): boolean {
-  const existing = current.collection.find((c) => c.card.pageId === item.card.pageId);
-  if (existing) return false;
-  const next = [...current.collection, item];
-  if (next.length > 500) {
-    next.length = 500;
+export function markSeenBatch(pageIds: readonly number[]): void {
+  let seen = snapshot.seen;
+  for (const pageId of pageIds) {
+    if (seen.includes(pageId)) continue;
+    seen = [...seen, pageId];
   }
-  setCollection(next);
-  return true;
+  if (seen.length > MAX_SEEN) seen = seen.slice(seen.length - MAX_SEEN);
+  persist(STORAGE_KEYS.seen, seen);
+  commit({ ...snapshot, seen });
 }
 
-export function removeFromCollection(pageId: number): void {
-  setCollection(current.collection.filter((c) => c.card.pageId !== pageId));
+export function hideCard(pageId: number): void {
+  if (snapshot.hidden.includes(pageId)) return;
+  const hidden = [...snapshot.hidden, pageId];
+  persist(STORAGE_KEYS.hidden, hidden);
+  commit({ ...snapshot, hidden });
 }
 
-export function setCollectionStatus(pageId: number, status: "want" | "read"): void {
-  setCollection(
-    current.collection.map((c) => (c.card.pageId === pageId ? { ...c, status } : c)),
-  );
+export function unhideCard(pageId: number): void {
+  const hidden = snapshot.hidden.filter((id) => id !== pageId);
+  persist(STORAGE_KEYS.hidden, hidden);
+  commit({ ...snapshot, hidden });
 }
 
-export function clearCollection(): void {
-  setCollection([]);
-}
-
-export function pushSeen(pageId: number): void {
-  if (current.seen.includes(pageId)) return;
-  const next = [...current.seen, pageId];
-  if (next.length > 200) next.shift();
-  setSeen(next);
-}
-
-export function addHidden(pageId: number): void {
-  if (current.hidden.includes(pageId)) return;
-  const next = [...current.hidden, pageId];
-  if (next.length > 200) next.shift();
-  setHidden(next);
-}
-
-export function removeHidden(pageId: number): void {
-  setHidden(current.hidden.filter((id) => id !== pageId));
-}
-
-export function clearHidden(): void {
-  setHidden([]);
-}
-
-export function clearLocalData(): void {
-  try {
-    localStorage.removeItem(KEYS.settings);
-    localStorage.removeItem(KEYS.collection);
-    localStorage.removeItem(KEYS.seen);
-    localStorage.removeItem(KEYS.hidden);
-  } catch {
-    // private mode or quota exceeded — best effort
-  }
-  current = {
-    settings: DEFAULT_SETTINGS(),
+export function clearAllData(): void {
+  for (const key of Object.values(STORAGE_KEYS)) removeKey(key);
+  commit({
+    settings: { ...DEFAULT_SETTINGS },
     collection: [],
     seen: [],
     hidden: [],
-  };
-  listeners.forEach((l) => l());
+  });
 }
 
-export function readLocalSnapshot(): Snapshot {
-  return current;
+export function readStore(): Snapshot {
+  return snapshot;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hooks                                                                      */
+/* -------------------------------------------------------------------------- */
+
+export function useStore(): Snapshot {
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+export function useSettings(): Settings {
+  return useStore().settings;
+}
+
+export function useCollection(): CollectionItem[] {
+  return useStore().collection;
+}
+
+export function useSeen(): number[] {
+  return useStore().seen;
+}
+
+export function useHidden(): number[] {
+  return useStore().hidden;
+}
+
+export function useCollectionCount(): number {
+  return useStore().collection.length;
 }

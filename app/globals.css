@@ -1,26 +1,344 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * `join` is excluded on purpose: daisyUI 5.7 emits an `@scope` rule there that
+ * Turbopack's CSS parser rejects, which breaks the dev server. Nothing in
+ * Wikinder uses joined inputs or buttons.
+ */
+@plugin "daisyui" {
+  themes: false;
+  exclude: join;
+  logs: false;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* -------------------------------------------------------------------------- */
+/* Themes: editorial paper, warm night, sepia, high contrast                   */
+/* -------------------------------------------------------------------------- */
+
+@plugin "daisyui/theme" {
+  name: "kertas";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #fbf8f2;
+  --color-base-200: #f3eee4;
+  --color-base-300: #e6dfd0;
+  --color-base-content: #1f1b16;
+
+  --color-primary: #8e2a1f;
+  --color-primary-content: #fff8f0;
+  --color-secondary: #4a4133;
+  --color-secondary-content: #fbf8f2;
+  --color-accent: #8e2a1f;
+  --color-accent-content: #fff8f0;
+  --color-neutral: #26221c;
+  --color-neutral-content: #fbf8f2;
+
+  --color-info: #2f4a6b;
+  --color-info-content: #fbf8f2;
+  --color-success: #2f6b4f;
+  --color-success-content: #fbf8f2;
+  --color-warning: #7a4e12;
+  --color-warning-content: #fbf8f2;
+  --color-error: #a32a2a;
+  --color-error-content: #fff8f0;
+
+  --muted: #5b5347;
+  --hairline: #d9d0bf;
+  --stamp: #8e2a1f;
+
+  --radius-selector: 9999px;
+  --radius-field: 10px;
+  --radius-box: 16px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@plugin "daisyui/theme" {
+  name: "malam";
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #14120f;
+  --color-base-200: #1c1915;
+  --color-base-300: #28241e;
+  --color-base-content: #efe8da;
+
+  --color-primary: #e58f7a;
+  --color-primary-content: #2a0e08;
+  --color-secondary: #a2937c;
+  --color-secondary-content: #14120f;
+  --color-accent: #e58f7a;
+  --color-accent-content: #2a0e08;
+  --color-neutral: #2e2820;
+  --color-neutral-content: #efe8da;
+
+  --color-info: #9cc0dd;
+  --color-info-content: #0b1a26;
+  --color-success: #7fc49a;
+  --color-success-content: #08170f;
+  --color-warning: #e3b36b;
+  --color-warning-content: #241505;
+  --color-error: #f09090;
+  --color-error-content: #2b0a0a;
+
+  --muted: #b4a893;
+  --hairline: #37312a;
+  --stamp: #f09090;
+
+  --radius-selector: 9999px;
+  --radius-field: 10px;
+  --radius-box: 16px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "sepia";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #f1e4c8;
+  --color-base-200: #e9d9b6;
+  --color-base-300: #dcc793;
+  --color-base-content: #3b2f20;
+
+  --color-primary: #7a2e1b;
+  --color-primary-content: #fbe9c8;
+  --color-secondary: #5a4526;
+  --color-secondary-content: #f7e9cb;
+  --color-accent: #7a2e1b;
+  --color-accent-content: #fbe9c8;
+  --color-neutral: #4a3b26;
+  --color-neutral-content: #f5e7c9;
+
+  --color-info: #3f4e6e;
+  --color-info-content: #f1e4c8;
+  --color-success: #2e5b3c;
+  --color-success-content: #f1e4c8;
+  --color-warning: #7a4e12;
+  --color-warning-content: #f1e4c8;
+  --color-error: #8c2c22;
+  --color-error-content: #fbe9c8;
+
+  --muted: #6a5740;
+  --hairline: #cbb682;
+  --stamp: #7a2e1b;
+
+  --radius-selector: 9999px;
+  --radius-field: 10px;
+  --radius-box: 16px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+  name: "kontras";
+  default: false;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f2f2f2;
+  --color-base-300: #e3e3e3;
+  --color-base-content: #000000;
+
+  --color-primary: #0a2540;
+  --color-primary-content: #ffffff;
+  --color-secondary: #1f1f1f;
+  --color-secondary-content: #ffffff;
+  --color-accent: #0a2540;
+  --color-accent-content: #ffffff;
+  --color-neutral: #000000;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #003a75;
+  --color-info-content: #ffffff;
+  --color-success: #14532d;
+  --color-success-content: #ffffff;
+  --color-warning: #5c3d00;
+  --color-warning-content: #ffffff;
+  --color-error: #8b0000;
+  --color-error-content: #ffffff;
+
+  --muted: #3a3a3a;
+  --hairline: #bdbdbd;
+  --stamp: #8b0000;
+
+  --radius-selector: 9999px;
+  --radius-field: 8px;
+  --radius-box: 12px;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Design tokens                                                              */
+/* -------------------------------------------------------------------------- */
+
+@theme {
+  --font-display: var(--font-instrument), Georgia, "Times New Roman", serif;
+  --font-reading: var(--font-newsreader), Georgia, "Times New Roman", serif;
+  --font-ui: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-stamp: var(--stamp);
+
+  --shadow-card:
+    0 1px 1px rgb(31 27 22 / 0.04), 0 6px 12px -6px rgb(31 27 22 / 0.12),
+    0 18px 38px -24px rgb(31 27 22 / 0.28);
+  --shadow-lifted:
+    0 2px 2px rgb(31 27 22 / 0.05), 0 10px 20px -8px rgb(31 27 22 / 0.16),
+    0 32px 60px -30px rgb(31 27 22 / 0.32);
+
+  --ease-editorial: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Base                                                                       */
+/* -------------------------------------------------------------------------- */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--color-base-100);
+  }
+
+  body {
+    font-family: var(--font-ui);
+    background-color: var(--color-base-100);
+    color: var(--color-base-content);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-primary) 22%, transparent);
+    color: var(--color-base-content);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* -------------------------------------------------------------------------- */
+/* Utilities                                                                  */
+/* -------------------------------------------------------------------------- */
+
+@utility label-caps {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility text-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+}
+
+@utility text-measure {
+  max-width: 65ch;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Very fine paper grain, drawn inline so it costs no request. */
+@utility paper-grain {
+  position: relative;
+  isolation: isolate;
+}
+
+.paper-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.32;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.055'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+[data-theme="malam"] .paper-grain::after,
+[data-theme="kontras"] .paper-grain::after {
+  mix-blend-mode: screen;
+  opacity: 0.18;
+}
+
+/* Kerning pairs for small caps labels on the tab bar. */
+.tab-label {
+  letter-spacing: 0.06em;
+}
+
+/* Reader typography is driven by CSS variables so the panel previews live. */
+.reader-prose {
+  font-family: var(--reader-font, var(--font-reading));
+  font-size: var(--reader-size, 1.125rem);
+  line-height: var(--reader-leading, 1.65);
+}
+
+.reader-prose p {
+  margin-block: 0 1.15em;
+}
+
+.reader-prose p:last-child {
+  margin-bottom: 0;
 }
