@@ -1,4 +1,4 @@
-import type { Card, Lang } from "./types";
+import type { Card, ArticleLang } from "./types";
 
 export type ApiErrorBody = { error: { code: string; message: string } };
 
@@ -47,13 +47,13 @@ function readCards(payload: unknown): Card[] {
   return Array.isArray(cards) ? (cards as Card[]) : [];
 }
 
-export async function requestCards(lang: Lang, signal?: AbortSignal): Promise<Card[]> {
+export async function requestCards(lang: ArticleLang, signal?: AbortSignal): Promise<Card[]> {
   const payload = await getJSON(`/api/cards?lang=${lang}`, signal);
   return readCards(payload);
 }
 
 export async function requestSearch(
-  lang: Lang,
+  lang: ArticleLang,
   query: string,
   signal?: AbortSignal,
 ): Promise<Card[]> {

@@ -11,7 +11,7 @@ import {
   type Card,
   type CollectionItem,
   type Highlight,
-  type Lang,
+  type ArticleLang,
   type ResumeEntry,
   type Settings,
   type TextSize,
@@ -135,7 +135,7 @@ function isTheme(value: unknown): value is Theme {
   return typeof value === "string" && (THEMES as readonly string[]).includes(value);
 }
 
-function isLang(value: unknown): value is Lang {
+function isLang(value: unknown): value is ArticleLang {
   return value === "id" || value === "en" || value === "jv" || value === "su";
 }
 
@@ -205,6 +205,7 @@ export function migrateSettings(raw: unknown): Settings {
   if (typeof source.openAllSections === "boolean") settings.openAllSections = source.openAllSections;
   if (typeof source.showTocDesktop === "boolean") settings.showTocDesktop = source.showTocDesktop;
   if (typeof source.resumePrompt === "boolean") settings.resumePrompt = source.resumePrompt;
+  if (typeof source.gestureHint === "boolean") settings.gestureHint = source.gestureHint;
 
   if (typeof source.speechRate === "number" && Number.isFinite(source.speechRate)) {
     settings.speechRate = Math.min(1.5, Math.max(0.8, Math.round(source.speechRate * 10) / 10));
@@ -468,6 +469,12 @@ export function restoreCard(item: CollectionItem): void {
 export function clearCollection(): void {
   persist(STORAGE_KEYS.collection, []);
   commit({ ...snapshot, collection: [] });
+}
+
+export function replaceCollection(items: CollectionItem[]): void {
+  const collection = items.slice(0, MAX_COLLECTION);
+  persist(STORAGE_KEYS.collection, collection);
+  commit({ ...snapshot, collection });
 }
 
 export function markSeen(pageId: number): void {

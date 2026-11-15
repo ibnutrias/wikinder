@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { SPEECH_LANG } from "./reader-style";
-import type { Lang } from "./types";
+import type { ArticleLang } from "./types";
 
 export type SpeechStatus = "idle" | "playing" | "paused";
 
@@ -50,7 +50,7 @@ function chunkText(text: string): string[] {
  * Speech synthesis wrapper: one short utterance per sentence so browsers that
  * stall on long utterances keep moving, and a hard `cancel()` on unmount.
  */
-export function useSpeech(lang: Lang, initialRate: number): UseSpeechResult {
+export function useSpeech(lang: ArticleLang, initialRate: number): UseSpeechResult {
   const supported = useSyncExternalStore(
     subscribeToNothing,
     () => "speechSynthesis" in window,

@@ -21,7 +21,7 @@ import {
   useSeen,
   useSettings,
 } from "@/lib/store";
-import type { Card, Lang } from "@/lib/types";
+import type { Card, ArticleLang } from "@/lib/types";
 
 const MAX_UNDO = 10;
 const MAX_FETCH_ATTEMPTS = 3;
@@ -38,7 +38,7 @@ export type SessionCounts = {
 
 type SessionApi = {
   status: SessionStatus;
-  lang: Lang;
+  lang: ArticleLang;
   total: number;
   visibleCards: Card[];
   current: Card | null;

@@ -1,8 +1,10 @@
-export type Lang = "id" | "en" | "jv" | "su";
+import { type UiLang } from "./i18n/en";
+import { type ArticleLang } from "./i18n/id";
+export { type UiLang, type ArticleLang };
 
 export type Card = {
   pageId: number;
-  lang: Lang;
+  lang: ArticleLang;
   title: string;
   extract: string;
   thumbnail?: { src: string; width: number; height: number };
@@ -38,13 +40,14 @@ export type Settings = {
   fontChoice: FontChoice;
   lineHeight: number;
   measure: Measure;
-  lang: Lang;
+  lang: ArticleLang;
   imageOnly: boolean;
   sessionLength: SessionLength;
   haptics: boolean;
   openAllSections: boolean;
   showTocDesktop: boolean;
   resumePrompt: boolean;
+  gestureHint: boolean;
   speechRate: number;
   motion: MotionPreference;
   touchTarget: TouchTarget;
@@ -56,13 +59,14 @@ export const DEFAULT_SETTINGS: Settings = {
   fontChoice: "serif",
   lineHeight: 1.65,
   measure: "normal",
-  lang: "id",
+  lang: "en",
   imageOnly: false,
   sessionLength: 10,
   haptics: true,
   openAllSections: false,
   showTocDesktop: true,
   resumePrompt: true,
+  gestureHint: true,
   speechRate: 1,
   motion: "system",
   touchTarget: "normal",
@@ -97,7 +101,7 @@ export type CollectionItem = {
 /** Resume point for one article, stored per page id. */
 export type ResumeEntry = {
   pageId: number;
-  lang: Lang;
+  lang: ArticleLang;
   sectionId: string;
   sectionTitle: string;
   /** Relative position (0–1) inside the section, so text reflow keeps meaning. */
@@ -108,7 +112,7 @@ export type ResumeEntry = {
 /** A paragraph the reader marked. Text hashes guard against edited articles. */
 export type Highlight = {
   pageId: number;
-  lang: Lang;
+  lang: ArticleLang;
   sectionId: string;
   paragraphIndex: number;
   textHash: string;

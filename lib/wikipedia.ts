@@ -1,15 +1,15 @@
-import type { Card, Lang } from "./types";
+import type { Card, ArticleLang } from "./types";
 
 export const ALLOWED_LANGS = ["id", "en", "jv", "su"] as const;
 
-export const LANG_LABEL: Record<Lang, string> = {
+export const LANG_LABEL: Partial<Record<ArticleLang, string>> = {
   id: "Indonesia",
   en: "Inggris",
   jv: "Jawa",
   su: "Sunda",
 };
 
-const WIKI_HOST: Record<Lang, string> = {
+const WIKI_HOST: Partial<Record<ArticleLang, string>> = {
   id: "id.wikipedia.org",
   en: "en.wikipedia.org",
   jv: "jv.wikipedia.org",
@@ -22,19 +22,20 @@ export const MIN_EXTRACT_LENGTH = 80;
 /** Number of random articles requested per batch. */
 export const BATCH_SIZE = 10;
 
-export function isLang(value: unknown): value is Lang {
+export function isLang(value: unknown): value is ArticleLang {
   return typeof value === "string" && (ALLOWED_LANGS as readonly string[]).includes(value);
 }
 
-export function parseLang(value: unknown): Lang | null {
+export function parseLang(value: unknown): ArticleLang | null {
   return isLang(value) ? value : null;
 }
 
-export function wikiHost(lang: Lang): string {
-  return WIKI_HOST[lang];
+export function wikiHost(lang: ArticleLang): string {
+  const host = WIKI_HOST[lang];
+  return host ?? "id.wikipedia.org";
 }
 
-export function articleUrl(lang: Lang, title: string): string {
+export function articleUrl(lang: ArticleLang, title: string): string {
   return `https://${wikiHost(lang)}/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
 }
 
@@ -69,7 +70,7 @@ export function randomCardsPath(): string {
   return `/w/api.php?${params.toString()}`;
 }
 
-export function searchPath(lang: Lang, query: string): string {
+export function searchPath(lang: ArticleLang, query: string): string {
   const params = cardProps(baseParams());
   params.set("generator", "search");
   params.set("gsrsearch", query);
@@ -78,7 +79,7 @@ export function searchPath(lang: Lang, query: string): string {
   return `/w/api.php?${params.toString()}`;
 }
 
-export function articlePath(lang: Lang, pageId: number): string {
+export function articlePath(lang: ArticleLang, pageId: number): string {
   const params = baseParams();
   params.set("pageids", String(pageId));
   params.set("prop", "extracts|pageimages|info");
@@ -90,7 +91,7 @@ export function articlePath(lang: Lang, pageId: number): string {
   return `/w/api.php?${params.toString()}`;
 }
 
-export function apiUrl(lang: Lang, path: string): string {
+export function apiUrl(lang: ArticleLang, path: string): string {
   return `https://${wikiHost(lang)}${path}`;
 }
 
@@ -146,7 +147,7 @@ function tidyExtract(value: string): string {
  * Returns null for anything that would make a poor card (stubs, disambiguation
  * pages, missing titles).
  */
-export function normalizeCard(input: unknown, lang: Lang): Card | null {
+export function normalizeCard(input: unknown, lang: ArticleLang): Card | null {
   if (!isRecord(input)) return null;
 
   const pageId = readNumber(input.pageid);
@@ -189,7 +190,7 @@ function readPages(payload: unknown): unknown[] {
   return [];
 }
 
-export function normalizeCards(payload: unknown, lang: Lang): Card[] {
+export function normalizeCards(payload: unknown, lang: ArticleLang): Card[] {
   const cards: Card[] = [];
   for (const page of readPages(payload)) {
     const card = normalizeCard(page, lang);
@@ -214,7 +215,7 @@ export function sortCardsByIndex(cards: Card[], payload: unknown): Card[] {
 }
 
 export type FullArticle = {
-  lang: Lang;
+  lang: ArticleLang;
   pageId: number;
   title: string;
   extract: string;
@@ -230,7 +231,7 @@ export type FullArticle = {
  * Reader normaliser: unlike `normalizeCard` it accepts short articles and does
  * not filter disambiguation pages (the reader shows whatever was requested).
  */
-export function normalizeArticle(payload: unknown, lang: Lang): FullArticle | null {
+export function normalizeArticle(payload: unknown, lang: ArticleLang): FullArticle | null {
   for (const page of readPages(payload)) {
     if (!isRecord(page)) continue;
     if (page.missing !== undefined) return null;

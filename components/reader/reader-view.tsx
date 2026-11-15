@@ -43,7 +43,7 @@ import { useScrollSpy } from "@/lib/use-scroll-spy";
 import { useSpeech } from "@/lib/use-speech";
 import { useResolvedTheme } from "@/lib/use-resolved-theme";
 import { LANG_LABEL, type FullArticle } from "@/lib/wikipedia";
-import type { Lang } from "@/lib/types";
+import type { ArticleLang } from "@/lib/types";
 
 const INTRO_ID = "ringkasan";
 
@@ -68,7 +68,7 @@ export function ReaderView({
   const [chromeHidden, setChromeHidden] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [dismissedResume, setDismissedResume] = useState(false);
-  const [nextCard, setNextCard] = useState<{ lang: Lang; pageId: number } | null>(null);
+  const [nextCard, setNextCard] = useState<{ lang: ArticleLang; pageId: number } | null>(null);
 
   const progressRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -528,7 +528,7 @@ export function ReaderView({
         open={sheet === "cite"}
         onClose={() => setSheet(null)}
         article={article}
-        langLabel={LANG_LABEL[article.lang]}
+        langLabel={LANG_LABEL[article.lang] ?? article.lang}
       />
       <HighlightsSheet
         open={sheet === "highlights"}
